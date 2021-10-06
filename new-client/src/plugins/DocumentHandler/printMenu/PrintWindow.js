@@ -51,6 +51,8 @@ class PrintWindow extends React.PureComponent {
     printText: true,
     printImages: true,
     printMaps: false,
+    printStandardLinks: false,
+    printCustomLinks: true,
     allDocumentsToggled: false,
     includeCompleteToc: true,
     chapterInformation: this.setChapterInfo(),
@@ -308,17 +310,42 @@ class PrintWindow extends React.PureComponent {
     });
   };
 
+  isCustomLinkTag = (linkElement) => {
+    const customAttributes = ["data-maplink", "data-document"]; //include "data-link" as a custom link?
+    const tagAttributes = linkElement.getAttributeNames();
+
+    const isCustom = tagAttributes.some((attr) =>
+      customAttributes.includes(attr)
+    );
+
+    return isCustom;
+  };
+
   removeTagsNotSelectedForPrint = (chapter) => {
-    const { printImages, printText } = this.state;
+    const { printImages, printText, printStandardLinks, printCustomLinks } =
+      this.state;
 
     let elementsToRemove = [];
     const div = document.createElement("div");
     div.innerHTML = chapter.html;
 
-    //A-tags should always be removed before printing
-    Array.from(div.getElementsByTagName("a")).forEach((element) => {
-      elementsToRemove.push(element);
-    });
+    if (!printStandardLinks) {
+      //TODO - where should this be configurable?
+      //remove A tags before printing
+      Array.from(div.getElementsByTagName("a")).forEach((element) => {
+        if (!this.isCustomLinkTag(element)) {
+          elementsToRemove.push(element);
+        }
+      });
+    }
+    if (!printCustomLinks) {
+      //remove custom A tags before printing (e.g. mapLinks, documentLinks)
+      Array.from(div.getElementsByTagName("a")).forEach((element) => {
+        if (this.isCustomLinkTag(element)) {
+          elementsToRemove.push(element);
+        }
+      });
+    }
     if (!printImages) {
       Array.from(div.getElementsByTagName("figure")).forEach((element) => {
         elementsToRemove.push(element);
