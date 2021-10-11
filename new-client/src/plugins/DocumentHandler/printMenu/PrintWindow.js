@@ -51,8 +51,8 @@ class PrintWindow extends React.PureComponent {
     printText: true,
     printImages: true,
     printMaps: false,
-    printStandardLinks: false,
-    printCustomLinks: true,
+    printStandardLinks: this.props.options?.printStandardLinks ?? true,
+    printCustomLinks: this.props.options?.printCustomLinks ?? true,
     allDocumentsToggled: false,
     includeCompleteToc: true,
     chapterInformation: this.setChapterInfo(),
@@ -311,7 +311,8 @@ class PrintWindow extends React.PureComponent {
   };
 
   isCustomLinkTag = (linkElement) => {
-    const customAttributes = ["data-maplink", "data-document"]; //include "data-link" as a custom link?
+    //map links and document links are considered custom links. External links ("data-link") are not.
+    const customAttributes = ["data-maplink", "data-document"];
     const tagAttributes = linkElement.getAttributeNames();
 
     const isCustom = tagAttributes.some((attr) =>
@@ -330,7 +331,6 @@ class PrintWindow extends React.PureComponent {
     div.innerHTML = chapter.html;
 
     if (!printStandardLinks) {
-      //TODO - where should this be configurable?
       //remove A tags before printing
       Array.from(div.getElementsByTagName("a")).forEach((element) => {
         if (!this.isCustomLinkTag(element)) {
@@ -339,7 +339,6 @@ class PrintWindow extends React.PureComponent {
       });
     }
     if (!printCustomLinks) {
-      //remove custom A tags before printing (e.g. mapLinks, documentLinks)
       Array.from(div.getElementsByTagName("a")).forEach((element) => {
         if (this.isCustomLinkTag(element)) {
           elementsToRemove.push(element);

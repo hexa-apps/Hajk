@@ -811,6 +811,8 @@
         "height": "90vh",
         "searchImplemented": true,
         "enablePrint": true,
+        "printStandardLinks": true,
+        "printCustomLinks": true,
         "menuConfig": {
           "menu": [
             {
